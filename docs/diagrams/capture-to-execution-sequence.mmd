@@ -1,0 +1,43 @@
+sequenceDiagram
+  actor User
+  participant UI as Extension UI
+  participant Page as Untrusted Page
+  participant Core as Coordinator
+  participant Local as Local Privacy Workers
+  participant Gate as Egress Gateway
+  participant VLM as Remote VLM
+  participant Exec as Validator/Executor
+  User->>UI: Activate and state task
+  UI->>Core: Create task nonce + consent scope
+  Core->>Page: Read nav/document/mutation/viewport
+  par Local observation
+    Core->>Page: Collect DOM/ARIA-derived graph
+  and Visible pixels
+    Core->>Core: captureVisibleTab
+  end
+  Core->>Page: Re-read state
+  alt state changed
+    Core-->>Core: Cancel stale snapshot and recapture
+  else stable
+    Core->>Local: Raw handles + sanitized-task work item
+    Local->>Local: Normalize, detect, OCR, classify, cover
+    Local->>Local: Compile fresh image/graph and verify exact bytes
+    alt blocked or remask
+      Local-->>UI: Safe status; no network
+    else SAFE_TO_SEND
+      Local->>Gate: Digest-bound VerifiedEnvelope
+      Gate->>VLM: Minimized sanitized request
+      VLM-->>Gate: One strict ActionPlan
+      Gate->>Exec: Untrusted action
+      Exec->>Page: Validate snapshot and live DOM target
+      alt high-risk
+        Exec->>UI: Confirm exact action digest
+        User-->>UI: Confirm / decline
+        UI->>Exec: Single-use confirmation
+        Exec->>Page: Revalidate target and state
+      end
+      Exec->>Page: Execute permitted DOM action
+      Page-->>Exec: New state / postcondition
+      Exec-->>UI: Privacy-safe receipt
+    end
+  end

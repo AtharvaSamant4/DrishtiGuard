@@ -1,0 +1,26 @@
+stateDiagram-v2
+  [*] --> RECEIVED
+  RECEIVED --> SCHEMA_VALIDATED: exact schema
+  SCHEMA_VALIDATED --> SNAPSHOT_VALIDATED: task + nonce + nav + mutation current
+  SNAPSHOT_VALIDATED --> TARGET_BOUND: live DOM target matches fingerprint
+  TARGET_BOUND --> POLICY_ALLOWED: effect allowed in task/origin scope
+  POLICY_ALLOWED --> CONFIRMATION_REQUIRED: consequential or ambiguous
+  POLICY_ALLOWED --> REVALIDATED: no confirmation required
+  CONFIRMATION_REQUIRED --> CONFIRMED: exact digest, single-use, not expired
+  CONFIRMATION_REQUIRED --> CANCELLED: decline / timeout
+  CONFIRMED --> REVALIDATED: state and target checked again
+  REVALIDATED --> EXECUTING
+  EXECUTING --> OUTCOME_VERIFIED
+  OUTCOME_VERIFIED --> SUCCEEDED
+  RECEIVED --> REJECTED: invalid schema / replay
+  SCHEMA_VALIDATED --> STALE: state mismatch
+  SNAPSHOT_VALIDATED --> REJECTED: no target binding
+  TARGET_BOUND --> REJECTED: policy denies
+  CONFIRMED --> STALE: page changed
+  EXECUTING --> FAILED: execution error
+  OUTCOME_VERIFIED --> FAILED: postcondition mismatch
+  SUCCEEDED --> [*]
+  REJECTED --> [*]
+  STALE --> [*]
+  CANCELLED --> [*]
+  FAILED --> [*]

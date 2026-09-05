@@ -1,0 +1,39 @@
+flowchart TB
+  subgraph PAGE[UNTRUSTED WEBPAGE]
+    DOM[DOM / ARIA / pixels / scripts]
+  end
+  subgraph PROBE[ISOLATED PAGE PROBE]
+    DC[DOM + ARIA collector]
+    MO[Mutation observer]
+  end
+  subgraph CORE[PRIVILEGED EXTENSION CORE]
+    UI[Side panel / popup]
+    TC[Task coordinator]
+    CA[Capture adapter]
+    PA[Permission + capability adapters]
+    AP[Action policy]
+    AV[Validator + DOM executor]
+    EG[Egress gateway]
+  end
+  subgraph COMPUTE[LOCAL COMPUTE HOST + WORKERS]
+    CN[Coordinate normalizer]
+    VP[Visual detector]
+    OCR[ROI OCR]
+    PE[PII ensemble + coverage]
+    PC[Privacy compiler]
+    LV[Final-byte verifier]
+    TV[In-memory token vault]
+  end
+  DOM --> DC
+  DOM --> MO
+  UI --> TC
+  TC --> CA --> CN
+  DC --> CN
+  MO --> TC
+  CN --> VP --> OCR --> PE --> PC --> LV
+  DC --> PE
+  TV <--> PC
+  LV -->|VerifiedEnvelope| EG
+  EG -->|ActionPlan| AV
+  AP --> AV --> DOM
+  PA --> TC

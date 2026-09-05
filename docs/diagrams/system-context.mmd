@@ -1,0 +1,18 @@
+flowchart LR
+  U[User] -->|explicit task and consent| UI[Extension-owned UI]
+  W[Untrusted webpage] -->|DOM/ARIA-derived semantics| P[Page probe]
+  W -->|visible pixels| C[Capture adapter]
+  subgraph DEVICE[USER DEVICE - TRUSTED PRIVACY BOUNDARY]
+    UI --> O[Task + snapshot coordinator]
+    P --> L[Local perception + privacy pipeline]
+    C --> L
+    O --> L
+    L -->|VerifiedEnvelope only| G[Outbound privacy gateway]
+    V[In-memory token vault] <--> L
+    X[Policy + validator + executor] <--> O
+  end
+  G -->|TLS, minimized request| R[Remote VLM service]
+  R -->|one schema-constrained action| X
+  X -->|confirm consequential effect| U
+  X -->|DOM-backed action| W
+  G -. content-free metrics .-> T[Telemetry sink]

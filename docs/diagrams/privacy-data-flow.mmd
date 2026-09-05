@@ -1,0 +1,11 @@
+flowchart LR
+  A[Raw snapshot + task] --> B[Local detectors + coverage]
+  B --> C[Privacy compiler]
+  C --> D[Fresh encoded bitmap + exact serialized JSON]
+  D --> E{Final-artifact verifier}
+  E -->|SAFE_TO_SEND + digest| F[VerifiedEnvelope]
+  F --> G[Outbound gateway]
+  G --> H[Remote VLM]
+  E -->|recoverable residual| I[Expand / replace masks]
+  I --> D
+  E -->|low coverage / critical residual / policy| J[BLOCKED]

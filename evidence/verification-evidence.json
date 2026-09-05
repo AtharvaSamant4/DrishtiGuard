@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-09-05T15:00:00+05:30",
+  "scope": "deterministic synthetic fixture suite for the Chromium MV3 weekend MVP",
+  "claims": {
+    "synthetic_sensitive_items_omitted": "7/7",
+    "canary_leak_cases_blocked": "7/7",
+    "forbidden_key_cases_blocked": "3/3",
+    "coverage_gap_cases_blocked": "1/1",
+    "prompt_injection_cases_blocked": "3/3",
+    "stale_state_cases_blocked": "1/1",
+    "exact_payload_bytes": 654,
+    "extension_source_bytes": 63230,
+    "extension_source_files": 6
+  },
+  "limitations": [
+    "These are deterministic safety-gate fixtures, not model accuracy, field recall, browser parity, or universal privacy results.",
+    "The extension is DOM-first and masks visible media wholesale; no OCR, face detector, VLM, or remote planner is bundled.",
+    "Latency and resource p95 measurements require a frozen-device benchmark run before portal submission."
+  ]
+}

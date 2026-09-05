@@ -1,0 +1,741 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.drishtiguard.local/v1/drishtiguard.schema.json",
+  "title": "DrishtiGuard Contract Bundle v1",
+  "description": "Versioned local and wire contracts. Remote request types cannot represent raw screenshots, raw DOM, selectors or token mappings.",
+  "oneOf": [
+    { "$ref": "#/$defs/FrameSnapshotLocal" },
+    { "$ref": "#/$defs/DomElementGraph" },
+    { "$ref": "#/$defs/VisualElement" },
+    { "$ref": "#/$defs/SensitiveFinding" },
+    { "$ref": "#/$defs/RedactionRegion" },
+    { "$ref": "#/$defs/SanitizedScene" },
+    { "$ref": "#/$defs/PrivacyManifest" },
+    { "$ref": "#/$defs/VerifiedEnvelope" },
+    { "$ref": "#/$defs/RemoteInferenceRequest" },
+    { "$ref": "#/$defs/ActionPlan" },
+    { "$ref": "#/$defs/ExecutionReceipt" },
+    { "$ref": "#/$defs/ErrorEnvelope" }
+  ],
+  "$defs": {
+    "SchemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "OpaqueId": {
+      "type": "string",
+      "pattern": "^[a-z]{3}_[A-Za-z0-9_-]{4,64}$"
+    },
+    "TaskId": {
+      "type": "string",
+      "pattern": "^tsk_[A-Za-z0-9_-]{4,64}$"
+    },
+    "RequestId": {
+      "type": "string",
+      "pattern": "^req_[A-Za-z0-9_-]{4,64}$"
+    },
+    "SnapshotId": {
+      "type": "string",
+      "pattern": "^snp_[A-Za-z0-9_-]{4,64}$"
+    },
+    "NavigationId": {
+      "type": "string",
+      "pattern": "^nav_[A-Za-z0-9_-]{4,64}$"
+    },
+    "DocumentId": {
+      "type": "string",
+      "pattern": "^doc_[A-Za-z0-9_-]{4,64}$"
+    },
+    "DocumentFrameId": {
+      "type": "string",
+      "pattern": "^frm_[A-Za-z0-9_-]{4,64}$"
+    },
+    "ElementId": {
+      "type": "string",
+      "pattern": "^elm_[A-Za-z0-9_-]{4,64}$"
+    },
+    "FindingId": {
+      "type": "string",
+      "pattern": "^fnd_[A-Za-z0-9_-]{4,64}$"
+    },
+    "RedactionRegionId": {
+      "type": "string",
+      "pattern": "^rgn_[A-Za-z0-9_-]{4,64}$"
+    },
+    "TokenId": {
+      "type": "string",
+      "pattern": "^tok_[A-Za-z0-9_-]{4,64}$"
+    },
+    "ActionId": {
+      "type": "string",
+      "pattern": "^act_[A-Za-z0-9_-]{4,64}$"
+    },
+    "CorrelationId": {
+      "type": "string",
+      "pattern": "^cor_[A-Za-z0-9_-]{4,64}$"
+    },
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "Confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "BoundingBox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height", "coordinate_space"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 100000 },
+        "y": { "type": "number", "minimum": 0, "maximum": 100000 },
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 100000 },
+        "height": { "type": "number", "exclusiveMinimum": 0, "maximum": 100000 },
+        "coordinate_space": { "type": "string", "enum": ["ROOT_VISUAL_VIEWPORT_CSS", "ENCODED_IMAGE_PIXELS"] }
+      }
+    },
+    "NormalizedBoundingBox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height", "coordinate_space"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 100000 },
+        "y": { "type": "number", "minimum": 0, "maximum": 100000 },
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 100000 },
+        "height": { "type": "number", "exclusiveMinimum": 0, "maximum": 100000 },
+        "coordinate_space": { "type": "string", "const": "ROOT_VISUAL_VIEWPORT_CSS" }
+      }
+    },
+    "PixelBoundingBox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height", "coordinate_space"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 100000 },
+        "y": { "type": "number", "minimum": 0, "maximum": 100000 },
+        "width": { "type": "number", "exclusiveMinimum": 0, "maximum": 100000 },
+        "height": { "type": "number", "exclusiveMinimum": 0, "maximum": 100000 },
+        "coordinate_space": { "type": "string", "const": "ENCODED_IMAGE_PIXELS" }
+      }
+    },
+    "Viewport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "css_width", "css_height", "scroll_x", "scroll_y",
+        "image_width", "image_height", "observed_scale_x", "observed_scale_y",
+        "device_pixel_ratio", "browser_zoom"
+      ],
+      "properties": {
+        "css_width": { "type": "number", "exclusiveMinimum": 0, "maximum": 20000 },
+        "css_height": { "type": "number", "exclusiveMinimum": 0, "maximum": 20000 },
+        "scroll_x": { "type": "number", "minimum": 0, "maximum": 10000000 },
+        "scroll_y": { "type": "number", "minimum": 0, "maximum": 10000000 },
+        "image_width": { "type": "integer", "minimum": 1, "maximum": 20000 },
+        "image_height": { "type": "integer", "minimum": 1, "maximum": 20000 },
+        "observed_scale_x": { "type": "number", "exclusiveMinimum": 0, "maximum": 8 },
+        "observed_scale_y": { "type": "number", "exclusiveMinimum": 0, "maximum": 8 },
+        "device_pixel_ratio": { "type": "number", "exclusiveMinimum": 0, "maximum": 8 },
+        "browser_zoom": { "type": "number", "minimum": 0.25, "maximum": 5 }
+      }
+    },
+    "FrameSnapshotLocal": {
+      "type": "object",
+      "additionalProperties": false,
+      "writeOnly": true,
+      "$comment": "Local-only capability object. It must never enter a remote serializer.",
+      "required": [
+        "schema_version", "task_id", "tab_id", "snapshot_id", "navigation_id",
+        "document_id", "mutation_epoch", "captured_at", "viewport",
+        "origin_handle", "raw_bitmap_handle", "raw_dom_handle"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "task_id": { "$ref": "#/$defs/TaskId" },
+        "tab_id": { "type": "integer", "minimum": 0 },
+        "snapshot_id": { "$ref": "#/$defs/SnapshotId" },
+        "navigation_id": { "$ref": "#/$defs/NavigationId" },
+        "document_id": { "$ref": "#/$defs/DocumentId" },
+        "mutation_epoch": { "type": "integer", "minimum": 0 },
+        "captured_at": { "$ref": "#/$defs/Timestamp" },
+        "viewport": { "$ref": "#/$defs/Viewport" },
+        "origin_handle": {
+          "type": "string",
+          "pattern": "^local:origin:[A-Za-z0-9_-]{16,128}$",
+          "writeOnly": true
+        },
+        "raw_bitmap_handle": {
+          "type": "string",
+          "pattern": "^local:bitmap:[A-Za-z0-9_-]{16,128}$",
+          "writeOnly": true
+        },
+        "raw_dom_handle": {
+          "type": "string",
+          "pattern": "^local:dom:[A-Za-z0-9_-]{16,128}$",
+          "writeOnly": true
+        }
+      }
+    },
+    "ElementRole": {
+      "type": "string",
+      "enum": [
+        "BUTTON", "LINK", "INPUT", "TEXTAREA", "SELECT", "OPTION", "CHECKBOX",
+        "RADIO", "MENU", "MENU_ITEM", "TAB", "DIALOG", "STATUS", "TEXT", "ICON",
+        "IMAGE", "DOCUMENT", "FACE", "CONTAINER", "UNKNOWN"
+      ]
+    },
+    "ElementSource": {
+      "type": "string",
+      "enum": ["DOM", "VISION", "FUSED"]
+    },
+    "VisualElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "element_id", "role", "sanitized_label", "bounding_box",
+        "document_frame_id", "source", "confidence", "snapshot_id", "executable"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "element_id": { "$ref": "#/$defs/ElementId" },
+        "role": { "$ref": "#/$defs/ElementRole" },
+        "sanitized_label": { "type": "string", "maxLength": 160 },
+        "bounding_box": { "$ref": "#/$defs/NormalizedBoundingBox" },
+        "document_frame_id": { "$ref": "#/$defs/DocumentFrameId" },
+        "source": { "$ref": "#/$defs/ElementSource" },
+        "confidence": { "$ref": "#/$defs/Confidence" },
+        "snapshot_id": { "$ref": "#/$defs/SnapshotId" },
+        "executable": { "type": "boolean" }
+      }
+    },
+    "DomElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "element_id", "document_frame_id", "role", "sanitized_label", "bounding_box",
+        "visible", "enabled", "editable", "source", "confidence", "executable"
+      ],
+      "properties": {
+        "element_id": { "$ref": "#/$defs/ElementId" },
+        "parent_element_id": { "$ref": "#/$defs/ElementId" },
+        "document_frame_id": { "$ref": "#/$defs/DocumentFrameId" },
+        "role": { "$ref": "#/$defs/ElementRole" },
+        "sanitized_label": { "type": "string", "maxLength": 160 },
+        "bounding_box": { "$ref": "#/$defs/NormalizedBoundingBox" },
+        "visible": { "type": "boolean" },
+        "enabled": { "type": "boolean" },
+        "editable": { "type": "boolean" },
+        "checked": { "type": "boolean" },
+        "selected": { "type": "boolean" },
+        "safe_input_category": {
+          "type": "string",
+          "enum": ["NONE", "GENERAL_TEXT", "NUMBER", "DATE", "CHOICE", "SENSITIVE_TOKEN_ONLY", "FORBIDDEN_SECRET"]
+        },
+        "source": { "$ref": "#/$defs/ElementSource" },
+        "confidence": { "$ref": "#/$defs/Confidence" },
+        "executable": { "type": "boolean" }
+      }
+    },
+    "DomElementGraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "snapshot_id", "navigation_id", "mutation_epoch", "elements", "truncated"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "snapshot_id": { "$ref": "#/$defs/SnapshotId" },
+        "navigation_id": { "$ref": "#/$defs/NavigationId" },
+        "mutation_epoch": { "type": "integer", "minimum": 0 },
+        "elements": {
+          "type": "array",
+          "maxItems": 500,
+          "items": { "$ref": "#/$defs/DomElement" }
+        },
+        "truncated": { "type": "boolean" }
+      }
+    },
+    "PrivacyClass": {
+      "type": "string",
+      "enum": [
+        "PERSON", "FACE", "EMAIL", "PHONE", "ADDRESS", "EMPLOYEE_ID", "PAN",
+        "AADHAAR", "BANK_ACCOUNT", "IFSC", "PAYMENT_CARD", "FINANCIAL_AMOUNT",
+        "MEDICAL", "DOCUMENT", "SIGNATURE", "QR_BARCODE", "PASSWORD", "OTP",
+        "AUTH_TOKEN", "PRIVATE_KEY", "ORG_CONFIDENTIAL", "OTHER_SENSITIVE"
+      ]
+    },
+    "FindingSource": {
+      "type": "string",
+      "enum": ["DOM", "OCR", "VISION", "PATTERN", "NER", "USER", "SITE_POLICY"]
+    },
+    "CoverageStatus": {
+      "type": "string",
+      "enum": ["SCANNED", "MASKED", "SAFE_BY_POLICY", "UNKNOWN"]
+    },
+    "SensitiveFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "finding_id", "privacy_class", "sources", "confidence",
+        "severity", "redaction_policy", "coverage_status"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "finding_id": { "$ref": "#/$defs/FindingId" },
+        "privacy_class": { "$ref": "#/$defs/PrivacyClass" },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/FindingSource" }
+        },
+        "bounding_box": { "$ref": "#/$defs/NormalizedBoundingBox" },
+        "document_frame_id": { "$ref": "#/$defs/DocumentFrameId" },
+        "confidence": { "$ref": "#/$defs/Confidence" },
+        "severity": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+        "redaction_policy": { "type": "string", "enum": ["TOKENIZE", "SOLID_MASK", "GENERALIZE", "DROP", "BLOCK"] },
+        "coverage_status": { "$ref": "#/$defs/CoverageStatus" }
+      }
+    },
+    "RedactionRegion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "region_id", "snapshot_id", "finding_ids", "normalized_box",
+        "pixel_box", "mask_mode", "padding_css_px", "compositor_version"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "region_id": { "$ref": "#/$defs/RedactionRegionId" },
+        "snapshot_id": { "$ref": "#/$defs/SnapshotId" },
+        "finding_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/FindingId" }
+        },
+        "normalized_box": { "$ref": "#/$defs/NormalizedBoundingBox" },
+        "pixel_box": { "$ref": "#/$defs/PixelBoundingBox" },
+        "mask_mode": { "type": "string", "enum": ["SOLID_OPAQUE", "TYPED_REPLACEMENT", "DROP_REGION"] },
+        "replacement_class": { "$ref": "#/$defs/PrivacyClass" },
+        "padding_css_px": { "type": "number", "minimum": 0, "maximum": 128 },
+        "compositor_version": { "type": "string", "minLength": 1, "maxLength": 64 }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["mask_mode"],
+            "properties": {
+              "mask_mode": { "const": "TYPED_REPLACEMENT" }
+            }
+          },
+          "then": {
+            "required": ["replacement_class"],
+            "properties": {
+              "replacement_class": { "$ref": "#/$defs/PrivacyClass" }
+            }
+          },
+          "else": {
+            "properties": {
+              "replacement_class": false
+            }
+          }
+        }
+      ]
+    },
+    "CountByClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["privacy_class", "count"],
+      "properties": {
+        "privacy_class": { "$ref": "#/$defs/PrivacyClass" },
+        "count": { "type": "integer", "minimum": 0, "maximum": 10000 }
+      }
+    },
+    "ComponentVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["component", "version"],
+      "properties": {
+        "component": { "type": "string", "pattern": "^[a-z0-9._-]{1,64}$" },
+        "version": { "type": "string", "minLength": 1, "maxLength": 64 }
+      }
+    },
+    "PrivacyManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "policy_version", "components", "finding_counts", "mask_counts",
+        "token_counts", "coverage_total", "coverage_unknown", "image_included",
+        "sanitized_json_bytes", "verification_status", "attempt"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "policy_version": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$" },
+        "components": {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/ComponentVersion" }
+        },
+        "finding_counts": { "type": "array", "maxItems": 32, "items": { "$ref": "#/$defs/CountByClass" } },
+        "mask_counts": { "type": "array", "maxItems": 32, "items": { "$ref": "#/$defs/CountByClass" } },
+        "token_counts": { "type": "array", "maxItems": 32, "items": { "$ref": "#/$defs/CountByClass" } },
+        "coverage_total": { "type": "integer", "minimum": 0, "maximum": 100000 },
+        "coverage_unknown": { "type": "integer", "minimum": 0, "maximum": 100000 },
+        "mask_area_bucket": { "type": "string", "enum": ["NONE", "LT_5_PERCENT", "5_TO_15_PERCENT", "15_TO_35_PERCENT", "GT_35_PERCENT"] },
+        "image_included": { "type": "boolean" },
+        "sanitized_json_bytes": { "type": "integer", "minimum": 0, "maximum": 262144 },
+        "sanitized_image_bytes": { "type": "integer", "minimum": 0, "maximum": 5242880 },
+        "verification_status": {
+          "type": "string",
+          "enum": [
+            "UNVERIFIED", "VERIFYING", "SAFE_TO_SEND", "REQUIRES_ADDITIONAL_MASKING",
+            "BLOCKED_LOW_COVERAGE", "BLOCKED_RESIDUAL_PII", "BLOCKED_POLICY"
+          ]
+        },
+        "attempt": { "type": "integer", "minimum": 1, "maximum": 3 }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["image_included"],
+            "properties": {
+              "image_included": { "const": true }
+            }
+          },
+          "then": {
+            "required": ["sanitized_image_bytes"],
+            "properties": {
+              "sanitized_image_bytes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5242880
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "sanitized_image_bytes": false
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["verification_status"],
+            "properties": {
+              "verification_status": { "const": "SAFE_TO_SEND" }
+            }
+          },
+          "then": {
+            "properties": {
+              "coverage_unknown": { "const": 0 }
+            }
+          }
+        }
+      ]
+    },
+    "SafePrivacyManifest": {
+      "allOf": [
+        { "$ref": "#/$defs/PrivacyManifest" },
+        {
+          "type": "object",
+          "required": ["verification_status", "coverage_unknown"],
+          "properties": {
+            "verification_status": { "const": "SAFE_TO_SEND" },
+            "coverage_unknown": { "const": 0 }
+          }
+        }
+      ]
+    },
+    "SanitizedScene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "snapshot_id", "navigation_id", "mutation_epoch",
+        "sanitized_elements", "privacy_manifest", "verification_status"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "snapshot_id": { "$ref": "#/$defs/SnapshotId" },
+        "navigation_id": { "$ref": "#/$defs/NavigationId" },
+        "mutation_epoch": { "type": "integer", "minimum": 0 },
+        "sanitized_elements": {
+          "type": "array",
+          "maxItems": 500,
+          "items": { "$ref": "#/$defs/VisualElement" }
+        },
+        "sanitized_image_part_id": { "type": "string", "pattern": "^img_[A-Za-z0-9_-]{4,64}$" },
+        "privacy_manifest": { "$ref": "#/$defs/SafePrivacyManifest" },
+        "verification_status": { "type": "string", "const": "SAFE_TO_SEND" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["privacy_manifest"],
+            "properties": {
+              "privacy_manifest": {
+                "type": "object",
+                "required": ["image_included"],
+                "properties": {
+                  "image_included": { "const": true }
+                }
+              }
+            }
+          },
+          "then": {
+            "required": ["sanitized_image_part_id"],
+            "properties": {
+              "sanitized_image_part_id": {
+                "type": "string",
+                "pattern": "^img_[A-Za-z0-9_-]{4,64}$"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "sanitized_image_part_id": false
+            }
+          }
+        }
+      ]
+    },
+    "VerifiedEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "task_id", "request_id", "snapshot_id", "policy_version",
+        "body_sha256", "expires_at", "decision"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "task_id": { "$ref": "#/$defs/TaskId" },
+        "request_id": { "$ref": "#/$defs/RequestId" },
+        "snapshot_id": { "$ref": "#/$defs/SnapshotId" },
+        "policy_version": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$" },
+        "body_sha256": { "$ref": "#/$defs/Sha256" },
+        "expires_at": { "$ref": "#/$defs/Timestamp" },
+        "decision": { "type": "string", "const": "SAFE_TO_SEND" }
+      }
+    },
+    "AllowedActionType": {
+      "type": "string",
+      "enum": ["CLICK", "FOCUS", "SCROLL", "TYPE_TEXT", "SELECT_OPTION", "NAVIGATE_OPAQUE", "COMPLETE", "ABORT"]
+    },
+    "RemoteInferenceRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "request_id", "task_id", "snapshot_id", "navigation_id",
+        "mutation_epoch", "sanitized_task", "sanitized_scene", "allowed_actions",
+        "policy_version", "expires_at"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "request_id": { "$ref": "#/$defs/RequestId" },
+        "task_id": { "$ref": "#/$defs/TaskId" },
+        "snapshot_id": { "$ref": "#/$defs/SnapshotId" },
+        "navigation_id": { "$ref": "#/$defs/NavigationId" },
+        "mutation_epoch": { "type": "integer", "minimum": 0 },
+        "site_profile_id": { "type": "string", "pattern": "^[a-z0-9._-]{1,80}$" },
+        "origin_alias": { "type": "string", "pattern": "^site_[A-Za-z0-9_-]{4,64}$" },
+        "sanitized_task": { "type": "string", "minLength": 1, "maxLength": 2000 },
+        "sanitized_scene": { "$ref": "#/$defs/SanitizedScene" },
+        "allowed_actions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/AllowedActionType" }
+        },
+        "policy_version": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$" },
+        "expires_at": { "$ref": "#/$defs/Timestamp" }
+      },
+      "anyOf": [
+        {
+          "required": ["site_profile_id"],
+          "properties": {
+            "site_profile_id": { "type": "string", "pattern": "^[a-z0-9._-]{1,80}$" }
+          }
+        },
+        {
+          "required": ["origin_alias"],
+          "properties": {
+            "origin_alias": { "type": "string", "pattern": "^site_[A-Za-z0-9_-]{4,64}$" }
+          }
+        }
+      ]
+    },
+    "ClickAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "element_id"],
+      "properties": {
+        "type": { "type": "string", "const": "CLICK" },
+        "element_id": { "$ref": "#/$defs/ElementId" }
+      }
+    },
+    "FocusAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "element_id"],
+      "properties": {
+        "type": { "type": "string", "const": "FOCUS" },
+        "element_id": { "$ref": "#/$defs/ElementId" }
+      }
+    },
+    "ScrollAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "direction", "amount"],
+      "properties": {
+        "type": { "type": "string", "const": "SCROLL" },
+        "direction": { "type": "string", "enum": ["UP", "DOWN", "LEFT", "RIGHT"] },
+        "amount": { "type": "string", "enum": ["SMALL", "MEDIUM", "VIEWPORT"] }
+      }
+    },
+    "SafeValue": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "value"],
+          "properties": {
+            "kind": { "type": "string", "const": "LITERAL_SAFE" },
+            "value": { "type": "string", "maxLength": 512 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "value"],
+          "properties": {
+            "kind": { "type": "string", "const": "TOKEN_REF" },
+            "value": { "$ref": "#/$defs/TokenId" }
+          }
+        }
+      ]
+    },
+    "TypeTextAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "element_id", "value"],
+      "properties": {
+        "type": { "type": "string", "const": "TYPE_TEXT" },
+        "element_id": { "$ref": "#/$defs/ElementId" },
+        "value": { "$ref": "#/$defs/SafeValue" }
+      }
+    },
+    "SelectOptionAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "element_id", "option_element_id"],
+      "properties": {
+        "type": { "type": "string", "const": "SELECT_OPTION" },
+        "element_id": { "$ref": "#/$defs/ElementId" },
+        "option_element_id": { "$ref": "#/$defs/ElementId" }
+      }
+    },
+    "NavigateOpaqueAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "element_id"],
+      "properties": {
+        "type": { "type": "string", "const": "NAVIGATE_OPAQUE" },
+        "element_id": { "$ref": "#/$defs/ElementId" }
+      }
+    },
+    "CompleteAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "outcome_code"],
+      "properties": {
+        "type": { "type": "string", "const": "COMPLETE" },
+        "outcome_code": { "type": "string", "pattern": "^[A-Z0-9_]{1,64}$" }
+      }
+    },
+    "AbortAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "safe_reason_code"],
+      "properties": {
+        "type": { "type": "string", "const": "ABORT" },
+        "safe_reason_code": { "type": "string", "pattern": "^[A-Z0-9_]{1,64}$" }
+      }
+    },
+    "Action": {
+      "oneOf": [
+        { "$ref": "#/$defs/ClickAction" },
+        { "$ref": "#/$defs/FocusAction" },
+        { "$ref": "#/$defs/ScrollAction" },
+        { "$ref": "#/$defs/TypeTextAction" },
+        { "$ref": "#/$defs/SelectOptionAction" },
+        { "$ref": "#/$defs/NavigateOpaqueAction" },
+        { "$ref": "#/$defs/CompleteAction" },
+        { "$ref": "#/$defs/AbortAction" }
+      ]
+    },
+    "ActionPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "request_id", "task_id", "action_id", "snapshot_id",
+        "navigation_id", "mutation_epoch", "action", "confidence"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "request_id": { "$ref": "#/$defs/RequestId" },
+        "task_id": { "$ref": "#/$defs/TaskId" },
+        "action_id": { "$ref": "#/$defs/ActionId" },
+        "snapshot_id": { "$ref": "#/$defs/SnapshotId" },
+        "navigation_id": { "$ref": "#/$defs/NavigationId" },
+        "mutation_epoch": { "type": "integer", "minimum": 0 },
+        "action": { "$ref": "#/$defs/Action" },
+        "confidence": { "$ref": "#/$defs/Confidence" }
+      }
+    },
+    "ExecutionReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "task_id", "action_id", "snapshot_id_before", "action_type",
+        "result", "confirmation_status", "policy_decision", "latency_ms", "recorded_at"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "task_id": { "$ref": "#/$defs/TaskId" },
+        "action_id": { "$ref": "#/$defs/ActionId" },
+        "snapshot_id_before": { "$ref": "#/$defs/SnapshotId" },
+        "snapshot_id_after": { "$ref": "#/$defs/SnapshotId" },
+        "action_type": { "$ref": "#/$defs/AllowedActionType" },
+        "result": { "type": "string", "enum": ["SUCCEEDED", "REJECTED", "STALE", "CANCELLED", "FAILED"] },
+        "confirmation_status": { "type": "string", "enum": ["NOT_REQUIRED", "CONFIRMED", "DECLINED", "EXPIRED"] },
+        "policy_decision": { "type": "string", "enum": ["ALLOWED", "DENIED", "CONFIRMATION_REQUIRED"] },
+        "safe_error_code": { "type": "string", "pattern": "^[A-Z0-9_]{1,80}$" },
+        "latency_ms": { "type": "integer", "minimum": 0, "maximum": 600000 },
+        "recorded_at": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "ErrorEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "correlation_id", "component", "code", "retryable", "occurred_at"],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/SchemaVersion" },
+        "correlation_id": { "$ref": "#/$defs/CorrelationId" },
+        "component": { "type": "string", "pattern": "^[a-z0-9._-]{1,64}$" },
+        "code": {
+          "type": "string",
+          "pattern": "^(PERMISSION|CAPTURE|SNAPSHOT|COORDINATE|RUNTIME|MODEL|COVERAGE|PRIVACY|EGRESS|REMOTE|ACTION|TELEMETRY|INTERNAL)_[A-Z0-9_]{1,64}$"
+        },
+        "retryable": { "type": "boolean" },
+        "attempt": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "elapsed_bucket": { "type": "string", "enum": ["LT_100MS", "100_TO_500MS", "500MS_TO_2S", "2_TO_10S", "GT_10S"] },
+        "occurred_at": { "$ref": "#/$defs/Timestamp" }
+      }
+    }
+  }
+}

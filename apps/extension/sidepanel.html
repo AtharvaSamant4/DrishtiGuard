@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DrishtiGuard</title>
+    <link rel="stylesheet" href="sidepanel.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand-mark" aria-hidden="true"><span></span></div>
+        <div>
+          <p class="eyebrow">ON-DEVICE SAFETY LAYER</p>
+          <h1>DrishtiGuard</h1>
+        </div>
+        <span class="local-pill"><i></i> Local</span>
+      </header>
+
+      <section class="hero" aria-labelledby="task-title">
+        <p class="section-label">CURRENT TASK</p>
+        <h2 id="task-title">Review and submit this travel claim</h2>
+        <p>Capture begins only when you press the button. No page content is sent over the network.</p>
+        <button id="scan-button" class="primary" type="button">
+          <span class="scan-icon" aria-hidden="true"></span>
+          Scan visible page
+        </button>
+      </section>
+
+      <section class="panel pipeline-panel" aria-labelledby="pipeline-title">
+        <div class="panel-heading">
+          <h2 id="pipeline-title">Privacy pipeline</h2>
+          <span id="pipeline-state" class="state neutral">Waiting</span>
+        </div>
+        <ol class="pipeline" id="pipeline-list">
+          <li data-step="capture"><span>1</span><div><strong>Capture locally</strong><small>Visible DOM + screenshot</small></div><b>—</b></li>
+          <li data-step="detect"><span>2</span><div><strong>Detect sensitive regions</strong><small>Patterns + field metadata</small></div><b>—</b></li>
+          <li data-step="mask"><span>3</span><div><strong>Render a new bitmap</strong><small>Solid masks; original discarded</small></div><b>—</b></li>
+          <li data-step="verify"><span>4</span><div><strong>Verify exact payload</strong><small>Canaries, keys, SHA-256</small></div><b>—</b></li>
+          <li data-step="plan"><span>5</span><div><strong>Constrain action</strong><small>CLICK only; opaque target</small></div><b>—</b></li>
+        </ol>
+      </section>
+
+      <section id="failure-card" class="failure-card" role="alert" hidden>
+        <strong id="failure-title">Blocked safely</strong>
+        <p id="failure-message"></p>
+      </section>
+
+      <section id="evidence-section" class="panel" aria-labelledby="evidence-title" hidden>
+        <div class="panel-heading">
+          <div>
+            <p class="section-label">LOCAL EVIDENCE</p>
+            <h2 id="evidence-title">Redacted viewport</h2>
+          </div>
+          <span class="never-sent">Never sent</span>
+        </div>
+        <div class="preview-frame">
+          <img id="redacted-preview" alt="Locally generated screenshot with sensitive regions covered by solid masks">
+        </div>
+        <div class="metrics" aria-label="Scan metrics">
+          <div><strong id="metric-regions">0</strong><span>regions masked</span></div>
+          <div><strong id="metric-nodes">0</strong><span>safe nodes</span></div>
+          <div><strong id="metric-bytes">0 B</strong><span>payload</span></div>
+        </div>
+      </section>
+
+      <section id="verification-section" class="panel verification" aria-labelledby="verification-title" hidden>
+        <div class="panel-heading">
+          <div>
+            <p class="section-label">OUTBOUND GATE</p>
+            <h2 id="verification-title">Exact bytes verified</h2>
+          </div>
+          <span id="verification-badge" class="state neutral">Waiting</span>
+        </div>
+        <dl>
+          <div><dt>SHA-256</dt><dd id="digest">—</dd></div>
+          <div><dt>Unknown coverage</dt><dd id="coverage">—</dd></div>
+          <div><dt>Network</dt><dd>Disabled in MVP</dd></div>
+        </dl>
+        <details>
+          <summary>Inspect sanitized JSON</summary>
+          <pre id="payload-preview"></pre>
+        </details>
+      </section>
+
+      <section id="action-section" class="panel action-panel" aria-labelledby="action-title" hidden>
+        <p class="section-label">CONSTRAINED ACTION</p>
+        <h2 id="action-title"><code>CLICK</code> <span id="action-label"></span></h2>
+        <p class="opaque">Opaque target: <code id="opaque-target"></code></p>
+        <label id="confirmation-row" class="confirmation-row">
+          <input id="confirm-checkbox" type="checkbox">
+          <span>I reviewed the sanitized evidence and explicitly approve submission.</span>
+        </label>
+        <button id="execute-button" class="primary execute" type="button" disabled>Execute verified CLICK</button>
+        <p class="expiry">One-time capability · expires after 2 minutes · page is revalidated</p>
+      </section>
+
+      <section id="success-card" class="success-card" role="status" hidden>
+        <strong>Action executed locally</strong>
+        <p>The verified element was clicked after URL, page, target, and confirmation checks passed.</p>
+      </section>
+
+      <footer>
+        <button id="reset-button" class="text-button" type="button">Clear this scan</button>
+        <span>Prototype v0.1</span>
+      </footer>
+    </main>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

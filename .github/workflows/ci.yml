@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  extension-safety-gates:
+    name: Extension safety gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+
+      - name: Validate JavaScript syntax
+        run: |
+          node --check apps/extension/service-worker.js
+          node --check apps/extension/sidepanel.js
+
+      - name: Validate extension manifest
+        run: node -e "JSON.parse(require('node:fs').readFileSync('apps/extension/manifest.json', 'utf8'))"
+
+      - name: Run deterministic privacy fixtures
+        run: node apps/extension/tests/privacy-gate.test.cjs
+
+      - name: Validate versioned contract schema
+        run: node -e "JSON.parse(require('node:fs').readFileSync('contracts/v1/drishtiguard.schema.json', 'utf8'))"
+
+  live-demo:
+    name: Live-demo build and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/live-demo
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: npm
+          cache-dependency-path: apps/live-demo/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build and test
+        run: npm test
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high

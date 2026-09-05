@@ -1,0 +1,24 @@
+flowchart LR
+  subgraph TB0[TB0 HOSTILE PAGE ORIGIN]
+    P[DOM, scripts, pixels, frames]
+  end
+  subgraph TB1[TB1 ISOLATED PAGE PROBE]
+    D[DOM/ARIA-derived collector]
+  end
+  subgraph TB2[TB2 PRIVILEGED EXTENSION]
+    C[Coordinator + policy]
+    X[Validator + executor]
+  end
+  subgraph TB3[TB3 LOCAL PRIVACY COMPUTE]
+    V[Detector + compiler + verifier]
+    K[Memory-only vault]
+  end
+  subgraph TB4[TB4 CONTROLLED EGRESS]
+    G[Digest-bound gateway]
+  end
+  subgraph TB5[TB5 REMOTE / UNTRUSTED OUTPUT]
+    R[Stateless planner]
+  end
+  P --> D --> C --> V --> G --> R
+  R --> X --> P
+  K <--> V

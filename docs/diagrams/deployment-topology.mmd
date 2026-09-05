@@ -1,0 +1,20 @@
+flowchart LR
+  subgraph CLIENT[USER DEVICE]
+    EX[Store-signed WebExtension]
+    CH[Active compute host + workers]
+    MP[Bundled/signed model pack]
+    EX <--> CH
+    CH <--> MP
+  end
+  EX -->|TLS, verified request only| RP[Reverse proxy / WAF]
+  subgraph SERVICE[REMOTE MODULAR MONOLITH]
+    RP --> API[Auth + schema + rate limit]
+    API --> PP[Prompt/policy adapter]
+    PP --> IQ[Bounded inference scheduler]
+    IQ --> OV[Output schema validator]
+  end
+  IQ --> GPU[(GPU VLM runtime)]
+  OV --> EX
+  API -. content-free metrics .-> OBS[(Metrics + alerts)]
+  CI[Protected CI / signing] -->|signed extension + model manifest| EX
+  CI -->|digest-pinned image| SERVICE
