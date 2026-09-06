@@ -30,7 +30,7 @@ const PHASES: Array<{ key: Phase; short: string }> = [
   { key: "tokenizing", short: "Tokenize" },
   { key: "masking", short: "Mask" },
   { key: "verifying", short: "Verify" },
-  { key: "planning", short: "Plan" },
+  { key: "planning", short: "Propose" },
   { key: "confirming", short: "Confirm" },
   { key: "executed", short: "Execute" },
 ];
@@ -54,6 +54,14 @@ const rawClaim = {
   email: "aditi@example.com",
   account: "0000 0000 0000 4242",
   invoice: "DG-INV-0268",
+};
+
+const extensionRelease = {
+  version: "0.1.0",
+  download: "/downloads/DrishtiGuard-Chromium-v0.1.0.zip",
+  checksum: "/downloads/DrishtiGuard-Chromium-v0.1.0.zip.sha256.txt",
+  sha256: "b46cbbac81d829264485ddfebf17bbbec964ba203939d600abcc2a5b73c6d087",
+  size: "68 KB",
 };
 
 function randomTag(length = 4) {
@@ -262,7 +270,7 @@ export default function Home() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#demo" aria-label="DrishtiGuard interactive demo home">
+        <a className="brand" href="#top" aria-label="DrishtiGuard home">
           <span className="brand-mark" aria-hidden="true"><span /></span>
           <span>DrishtiGuard</span>
           <span className="brand-pill">LIVE CORE DEMO</span>
@@ -270,16 +278,18 @@ export default function Home() {
         <div className="topbar-status">
           <span className="pulse" aria-hidden="true" />
           <span>Runs locally in this tab</span>
-          <a href="#about">What this proves <span aria-hidden="true">↓</span></a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#demo">Live demo</a>
+          <a className="nav-download" href={extensionRelease.download} download><span className="download-full">Download extension</span><span className="download-short">Download ZIP</span><span aria-hidden="true">↓</span></a>
         </div>
       </header>
 
-      <section className="hero" id="demo" aria-labelledby="demo-title">
+      <section className="hero" id="top" aria-labelledby="demo-title">
         <div className="eyebrow"><span>SIH26171</span><span>Privacy-preserving browser automation</span></div>
         <div className="hero-row">
           <div>
-            <h1 id="demo-title">Watch the guardrail,<br /><em>not just the agent.</em></h1>
-            <p>One synthetic travel claim. A visible privacy boundary. Every outbound byte verified before a remote planner can see it.</p>
+            <h1 id="demo-title">Let the agent work.<br /><em>Keep private data local.</em></h1>
+            <p>DrishtiGuard removes sensitive information on your device before a browser agent receives context, then checks every proposed action before the browser performs it.</p>
           </div>
           <div className="run-panel">
             <div className="run-meta">
@@ -291,9 +301,34 @@ export default function Home() {
               <span aria-hidden="true">{isRunning ? "···" : "→"}</span>
             </button>
             <button className="reset-button" type="button" onClick={reset} disabled={phase === "idle"}>Reset demo</button>
+            <a className="hero-download" href={extensionRelease.download} download>
+              <span>Download Chromium extension</span>
+              <small>ZIP · v{extensionRelease.version} · {extensionRelease.size}</small>
+            </a>
           </div>
         </div>
       </section>
+
+      <section className="how-it-works" id="how-it-works" aria-labelledby="how-title">
+        <div className="how-heading">
+          <div><span className="section-index">HOW THE PROTOTYPE WORKS</span><h2 id="how-title">A private page becomes a safe, checked action.</h2></div>
+          <p>The web walkthrough below makes every boundary visible. The downloadable extension applies the same core safety path to the active browser tab.</p>
+        </div>
+        <ol className="how-flow">
+          <li><span>01</span><strong>User activates it</strong><p>DrishtiGuard receives temporary access only to the current tab after the toolbar click.</p><b>USER → DEVICE</b></li>
+          <li><span>02</span><strong>Page is observed locally</strong><p>Visible DOM meaning, field geometry and one viewport screenshot are collected inside the extension.</p><b>RAW INPUT STAYS LOCAL</b></li>
+          <li><span>03</span><strong>Secrets are removed</strong><p>PII values become typed placeholders; detected sensitive DOM regions and all visible media-like regions receive solid masks.</p><b>DETECT → TOKENIZE → MASK</b></li>
+          <li><span>04</span><strong>Only safe context is exposed</strong><p>The exact candidate payload is scanned for leaks and hashed. This MVP keeps networking disabled.</p><b>VERIFY EXACT BYTES</b></li>
+          <li><span>05</span><strong>The browser stays in control</strong><p>A narrow action is checked locally, consequential submission is confirmed, and the page is rechecked before execution.</p><b>VALIDATE → ACT OR BLOCK</b></li>
+        </ol>
+        <div className="boundary-legend" aria-label="Trust boundary summary">
+          <span><i className="legend-local" /> On device: raw page, screenshot, detection and execution</span>
+          <span><i className="legend-safe" /> Agent boundary: verified safe context and one constrained proposal</span>
+          <span><i className="legend-block" /> Any uncertainty: fail closed</span>
+        </div>
+      </section>
+
+      <div className="demo-heading" id="demo"><h2>INTERACTIVE WALKTHROUGH</h2><p>Run the normal path, then switch on each controlled failure.</p></div>
 
       <nav className="phase-strip" aria-label="Pipeline progress">
         {PHASES.map((item, index) => {
@@ -415,8 +450,9 @@ export default function Home() {
           </section>
 
           <section className="payload-section">
-            <div className="section-title"><span>02</span><h3>Exact outbound body</h3><span className={digest ? "verified-badge" : "pending-badge"}>{digest ? "VERIFIED" : "PENDING"}</span></div>
-            <pre aria-label="Exact serialized outbound JSON">{payloadText || "// No payload has crossed the boundary.\n// Run the pipeline to construct and verify it."}</pre>
+            <div className="section-title"><span>02</span><h3>Candidate safe payload</h3><span className={digest ? "verified-badge" : "pending-badge"}>{digest ? "VERIFIED" : "PENDING"}</span></div>
+            <pre aria-label="Exact serialized candidate JSON">{payloadText || "// No candidate payload exists yet.\n// Run the pipeline to construct and verify it."}</pre>
+            <p className="payload-note">Not transmitted in this demo. These are the exact bytes an integrated AI could receive.</p>
             <button className="digest-row" type="button" onClick={copyDigest} disabled={!digest} aria-label="Copy full SHA-256 digest">
               <span>SHA-256</span><code>{digest || "—"}</code><span>{copied ? "COPIED" : digest ? "COPY" : ""}</span>
             </button>
@@ -431,7 +467,7 @@ export default function Home() {
                 <div><span>VALUE</span><strong>₹12,480</strong></div>
                 <div><span>REVISION</span><strong className={revision !== 17 ? "danger-text" : ""}>{revision} / expected 17</strong></div>
               </div>
-            ) : <div className="empty-action">Remote planner receives no selectors, raw pixels or identifiers.</div>}
+            ) : <div className="empty-action">The simulated agent receives no selectors, raw pixels or identifiers.</div>}
           </section>
         </aside>
       </section>
@@ -466,19 +502,52 @@ export default function Home() {
         </article>
       </section>
 
+      <section className="extension-release" id="extension" aria-labelledby="extension-title">
+        <div className="release-main">
+          <div className="release-label"><span className="pulse" aria-hidden="true" /> FUNCTIONAL MANIFEST V3 MVP</div>
+          <h2 id="extension-title">Test the actual browser extension.</h2>
+          <p>The walkthrough above explains the boundary. This ZIP contains the working DrishtiGuard extension that scans a visible test page, produces a locally redacted preview, verifies the safe payload and guards the final click.</p>
+          <div className="release-actions">
+            <a className="release-download" href={extensionRelease.download} download>
+              <span>Download extension (.zip)</span>
+              <small>Chromium · v{extensionRelease.version} · {extensionRelease.size}</small>
+            </a>
+            <a className="source-link" href="https://github.com/AtharvaSamant4/DrishtiGuard/tree/main/apps/extension" target="_blank" rel="noreferrer">Inspect source ↗</a>
+          </div>
+          <div className="release-trust" aria-label="Extension privacy properties">
+            <span>No API key</span><span>No remote code</span><span>No host permission</span><span>No storage permission</span><span>Network disabled in MVP</span>
+          </div>
+          <div className="checksum-row">
+            <span>SHA-256</span><code>{extensionRelease.sha256}</code><a href={extensionRelease.checksum} download aria-label="Download SHA-256 checksum file">checksum file</a>
+          </div>
+        </div>
+
+        <aside className="install-card" aria-labelledby="install-title">
+          <span className="install-kicker">ABOUT 2 MINUTES</span>
+          <h3 id="install-title">Install the unpacked MVP</h3>
+          <ol>
+            <li><span>1</span><p><strong>Download and extract</strong> the ZIP to a permanent folder.</p></li>
+            <li><span>2</span><p>Open <code>chrome://extensions</code> and enable <strong>Developer mode</strong>.</p></li>
+            <li><span>3</span><p>Choose <strong>Load unpacked</strong> and select the extracted folder containing <code>manifest.json</code>.</p></li>
+            <li><span>4</span><p>Open an HTTP(S) test page, select DrishtiGuard and press <strong>Scan visible page</strong>.</p></li>
+          </ol>
+          <div className="prototype-warning"><strong>Prototype safety note</strong><span>Use synthetic or non-sensitive test pages. Chrome blocks direct website installation; a Web Store release is required for one-click install.</span></div>
+        </aside>
+      </section>
+
       <section className="about" id="about">
         <span className="about-number">04</span>
         <div><span className="about-kicker">WHAT THIS PROVES</span><h2>A runnable core, with an honest boundary.</h2></div>
         <div className="about-copy">
-          <p>This interactive site executes the core privacy state machine, typed-token generation, exact-body SHA-256 verification and local action checks in your browser.</p>
-          <p><strong>Scope disclaimer:</strong> this is not the packaged Chrome/Firefox extension. Browser capture, cross-origin isolation and native extension permissions remain part of the separate extension build and test track.</p>
+          <p>This interactive site executes the core privacy state machine, typed-token generation, exact-body SHA-256 verification and local action checks in your browser. The downloadable Chromium extension adds active-tab capture and a guarded local click.</p>
+          <p><strong>Scope disclaimer:</strong> the current MVP uses deterministic on-device rules and a simulated action proposal; it does not call a remote AI. Production still needs measured OCR/vision coverage, broader browser-surface support and independent security review.</p>
         </div>
       </section>
 
       <footer>
         <div className="footer-brand"><span className="brand-mark" aria-hidden="true"><span /></span><span><strong>DrishtiGuard</strong><small>See clearly. Share safely. Act deliberately.</small></span></div>
         <p>All people, identifiers, organizations and claims shown here are synthetic test data.</p>
-        <a href="#demo">Run again <span aria-hidden="true">↑</span></a>
+        <a href={extensionRelease.download} download>Download extension <span aria-hidden="true">↓</span></a>
       </footer>
     </main>
   );

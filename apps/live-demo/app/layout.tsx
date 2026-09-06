@@ -14,20 +14,20 @@ const deploymentOrigin =
 
 export const metadata: Metadata = {
   metadataBase: new URL(deploymentOrigin),
-  title: "DrishtiGuard — Interactive Privacy Boundary",
-  description: "A runnable, on-device demonstration of privacy-preserving browser automation for SIH26171.",
+  title: "DrishtiGuard — Privacy Guardrail & Extension Demo",
+  description: "See how DrishtiGuard protects browser-agent context on device, run the interactive safety walkthrough, and download the working Chromium extension MVP.",
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
   openGraph: {
-    title: "DrishtiGuard — The guardrail you can see",
-    description: "Watch an exact outbound payload get sanitized, verified and action-gated in your browser.",
+    title: "DrishtiGuard — Let the agent work. Keep private data local.",
+    description: "Run the privacy-boundary walkthrough and download the working Chromium extension MVP.",
     type: "website",
-    images: [{ url: "/og.png", width: 1731, height: 909, alt: "DrishtiGuard privacy boundary" }],
+    images: [{ url: "/og-extension.png", width: 1731, height: 909, alt: "DrishtiGuard keeps private browser data local before an AI receives safe context" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "DrishtiGuard — The guardrail you can see",
-    description: "A runnable privacy boundary for browser automation.",
-    images: ["/og.png"],
+    title: "DrishtiGuard — Let the agent work. Keep private data local.",
+    description: "Interactive privacy walkthrough plus a downloadable Chromium extension MVP.",
+    images: ["/og-extension.png"],
   },
 };
 

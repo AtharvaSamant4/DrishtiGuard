@@ -27,6 +27,10 @@ The evidence lab runs entirely in the browser with synthetic data and exposes th
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAtharvaSamant4%2FDrishtiGuard&root-directory=apps%2Flive-demo)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FAtharvaSamant4%2FDrishtiGuard)
 
+**Extension download:** [DrishtiGuard Chromium v0.1.0 ZIP](apps/live-demo/public/downloads/DrishtiGuard-Chromium-v0.1.0.zip) · [SHA-256 checksum](apps/live-demo/public/downloads/DrishtiGuard-Chromium-v0.1.0.zip.sha256.txt)
+
+The website serves this same versioned ZIP through its **Download extension** buttons. Chrome requires the ZIP to be extracted and loaded through Developer mode; silent installation from an ordinary website is not allowed.
+
 ![DrishtiGuard live evidence lab after confirmed execution](docs/assets/live-demo-executed.png)
 
 ## The problem
@@ -63,7 +67,7 @@ flowchart LR
 
 | Deliverable | Location | Status |
 |---|---|---|
-| Chromium Manifest V3 extension | [`apps/extension`](apps/extension) | Functional MVP |
+| Chromium Manifest V3 extension | [`apps/extension`](apps/extension) · [download ZIP](apps/live-demo/public/downloads/DrishtiGuard-Chromium-v0.1.0.zip) | Functional MVP v0.1.0 |
 | Deployable interactive evidence lab | [`apps/live-demo`](apps/live-demo) | Build and tests passing; live URL pending |
 | Versioned JSON wire contract | [`contracts/v1`](contracts/v1) | Draft 2020-12 schema |
 | TypeScript contract definitions | [`packages/contracts`](packages/contracts) | Architecture baseline |
@@ -149,12 +153,14 @@ After choosing the final domain, set `NEXT_PUBLIC_SITE_URL` to its HTTPS origin 
 
 ## Install the browser extension
 
-1. Clone or download this repository.
-2. Open `chrome://extensions` in Chrome or Chromium 116+.
-3. Enable **Developer mode**.
-4. Select **Load unpacked**.
-5. Choose the repository's `apps/extension` directory.
+1. Download the [DrishtiGuard Chromium v0.1.0 ZIP](apps/live-demo/public/downloads/DrishtiGuard-Chromium-v0.1.0.zip).
+2. Extract it to a permanent folder.
+3. Open `chrome://extensions` in Chrome or Chromium 116+.
+4. Enable **Developer mode**.
+5. Select **Load unpacked** and choose the extracted folder containing `manifest.json`.
 6. Open an HTTP(S) test page, select the DrishtiGuard toolbar icon, and choose **Scan visible page**.
+
+When working from a repository clone, select `apps/extension` directly instead. One-click installation requires a reviewed Chrome Web Store release.
 
 Chrome internal pages, the Chrome Web Store, and other restricted schemes are deliberately rejected.
 

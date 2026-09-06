@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { readFile, stat } from "node:fs/promises";
 import { createServer } from "node:net";
 import { createRequire } from "node:module";
 import { dirname } from "node:path";
@@ -83,16 +84,30 @@ test("server-renders the DrishtiGuard evidence lab", { timeout: 45_000 }, async 
   assert.equal(response.headers.get("x-frame-options"), "DENY");
 
   const html = await response.text();
-  assert.match(html, /<title>DrishtiGuard[^<]*Interactive Privacy Boundary<\/title>/i);
+  assert.match(html, /<title>DrishtiGuard[^<]*Privacy Guardrail[^<]*Extension Demo<\/title>/i);
   assert.match(html, /SIH26171/);
   assert.match(html, /Run privacy pipeline/);
-  assert.match(html, /Exact outbound body/);
+  assert.match(html, /HOW THE PROTOTYPE WORKS/);
+  assert.match(html, /Candidate safe payload/);
   assert.match(html, /FAILURE LAB/);
   assert.match(html, /Residual PII leak/);
   assert.match(html, /Page prompt injection/);
   assert.match(html, /Stale page state/);
   assert.match(html, /SYNTHETIC PAGE/);
+  assert.match(html, /Download extension \(\.zip\)/);
+  assert.match(html, /\/downloads\/DrishtiGuard-Chromium-v0\.1\.0\.zip/);
+  assert.match(html, /chrome:\/\/extensions/);
+  assert.match(html, /Chrome blocks direct website installation/);
+  assert.match(html, /does not call a remote AI/i);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/i);
+
+  const downloadResponse = await fetch(`${server.origin}/downloads/DrishtiGuard-Chromium-v0.1.0.zip`);
+  assert.equal(downloadResponse.status, 200);
+  assert.match(downloadResponse.headers.get("content-type") ?? "", /^application\/zip\b/i);
+  assert.match(downloadResponse.headers.get("content-disposition") ?? "", /^attachment;/i);
+  const downloadBytes = Buffer.from(await downloadResponse.arrayBuffer());
+  assert.ok(downloadBytes.length > 10_000, "extension ZIP should not be an empty placeholder");
+  assert.equal(downloadBytes.subarray(0, 4).toString("hex"), "504b0304");
 });
 
 test("source contains the claimed local safety gates", async () => {
@@ -105,4 +120,20 @@ test("source contains the claimed local safety gates", async () => {
   assert.match(page, /requiresConfirmation:\s*true/);
   assert.match(page, /performance\.now\(\)/);
   assert.doesNotMatch(page, /fetch\s*\(|XMLHttpRequest|WebSocket\s*\(/);
+});
+
+test("downloadable extension release and checksum are committed", async () => {
+  const archiveUrl = new URL("../public/downloads/DrishtiGuard-Chromium-v0.1.0.zip", import.meta.url);
+  const checksumUrl = new URL("../public/downloads/DrishtiGuard-Chromium-v0.1.0.zip.sha256.txt", import.meta.url);
+  const archive = await readFile(archiveUrl);
+  const checksum = await readFile(checksumUrl, "utf8");
+  const archiveStat = await stat(archiveUrl);
+  const pageSource = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+
+  assert.equal(archive.subarray(0, 4).toString("hex"), "504b0304");
+  assert.ok(archiveStat.size > 10_000);
+  assert.match(checksum, /^[a-f0-9]{64}[ ]{2}DrishtiGuard-Chromium-v0\.1\.0\.zip\n$/);
+  const digest = createHash("sha256").update(archive).digest("hex");
+  assert.equal(checksum.slice(0, 64), digest);
+  assert.match(pageSource, new RegExp(digest));
 });

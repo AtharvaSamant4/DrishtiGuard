@@ -7,6 +7,17 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/downloads/DrishtiGuard-Chromium-v0.1.0.zip",
+        headers: [
+          {
+            key: "Content-Disposition",
+            value: 'attachment; filename="DrishtiGuard-Chromium-v0.1.0.zip"',
+          },
+          { key: "Content-Type", value: "application/zip" },
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
         source: "/(.*)",
         headers: [
           { key: "Referrer-Policy", value: "no-referrer" },

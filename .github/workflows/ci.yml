@@ -62,6 +62,11 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Verify downloadable extension release
+        run: |
+          npm run package:extension
+          git diff --exit-code -- public/downloads
+
       - name: Lint
         run: npm run lint
 

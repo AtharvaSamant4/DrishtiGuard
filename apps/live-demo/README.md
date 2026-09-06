@@ -12,6 +12,8 @@ An interactive evidence lab for SIH26171, implemented as a standard Next.js appl
 
 The Failure Lab seeds three negative cases: a residual identifier, a prompt-injection instruction, and a stale page revision. Each fails closed.
 
+The site also explains the complete prototype in plain language and serves the versioned companion extension at `/downloads/DrishtiGuard-Chromium-v0.1.0.zip`, with a published SHA-256 checksum and unpacked-install instructions.
+
 ## Run locally
 
 Requirements: Node.js 22.13 or newer and npm.
@@ -43,6 +45,16 @@ Use the repository-root `render.yaml` as a Render Blueprint. It installs locked 
 
 ## Honest scope
 
-This deployable experience proves the interactive policy core and exact-payload authorization path. It is not the browser extension itself and does not claim model accuracy. The companion unpacked MV3 extension in `../extension` demonstrates explicit activation, visible-page capture, DOM-first masking, sanitized scene-graph construction, and guarded local click execution. A production pilot still requires measured on-device OCR/vision, broader browser-surface coverage, an authenticated server adapter, adversarial evaluation, and independent privacy/security review.
+This deployable experience proves the interactive policy core and exact-payload authorization path. The separately downloadable MV3 extension in `../extension` demonstrates explicit activation, visible-page capture, DOM-first masking, sanitized scene-graph construction, and guarded local click execution. The MVP does not call a remote AI or claim model accuracy. A production pilot still requires measured on-device OCR/vision, broader browser-surface coverage, an authenticated server adapter, adversarial evaluation, and independent privacy/security review.
+
+## Rebuild the extension download
+
+After changing extension runtime files or icons, regenerate the committed website download from `apps/live-demo`:
+
+```bash
+npm run package:extension
+```
+
+The packaging script creates a deterministic ZIP with `manifest.json` at the archive root and refreshes its checksum file.
 
 All displayed identities, identifiers, organizations, URLs, invoices, and account numbers are reserved synthetic fixtures.

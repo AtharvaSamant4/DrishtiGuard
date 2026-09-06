@@ -14,7 +14,26 @@ This is a functional Manifest V3 prototype for the SIH26171 demonstration. It sh
 
 The manifest has no host permissions, no storage permission, no remotely hosted code, no remote endpoint, and no API key. `connect-src 'none'` prevents extension-page networking in this MVP.
 
-## Install unpacked
+## Install the downloaded ZIP
+
+1. Use Chrome or Chromium 116 or newer.
+2. Extract `DrishtiGuard-Chromium-v0.1.0.zip` to a folder on your computer.
+3. Open `chrome://extensions`.
+4. Enable **Developer mode**.
+5. Select **Load unpacked** and choose the extracted folder containing `manifest.json`.
+6. Open a hosted or local HTTP(S) test page.
+7. Click the DrishtiGuard toolbar icon to open the side panel.
+8. Press **Scan visible page**.
+
+When working from the full source repository instead, select the `apps/extension` directory at step 5.
+
+Chrome does not allow a normal website to silently install an unpacked extension. One-click installation requires a reviewed Chrome Web Store release.
+
+## What stays local
+
+The original screenshot temporarily moves only between trusted extension components so the side panel can create the redacted preview. The raw screenshot and raw page values are never sent to an AI or network endpoint by this MVP.
+
+## Install from the source repository
 
 1. Use Chrome or Chromium 116 or newer.
 2. Open `chrome://extensions`.
@@ -55,6 +74,7 @@ This is a weekend MVP, not a claim of universal privacy or autonomous browsing:
 - `service-worker.js` — capture, local detection, sanitization, exact-payload verification, opaque capabilities, and guarded execution.
 - `sidepanel.html` / `sidepanel.css` — accessible reviewer interface.
 - `sidepanel.js` — local redacted-bitmap rendering and explicit confirmation flow.
+- `icons/` — branded Chromium toolbar and extension-management icons.
 
 No secrets or reusable credentials belong in this directory.
 
