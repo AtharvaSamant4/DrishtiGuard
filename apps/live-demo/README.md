@@ -64,7 +64,7 @@ Import the repository in Vercel and set **Root Directory** to `apps/live-demo`. 
 
 ## Deploy on Render
 
-Use the repository-root `render.yaml` as a Render Blueprint. It builds this Dockerfile, starts the Next.js standalone server and checks `/api/health`. Enter the service's final HTTPS origin when Render prompts for `NEXT_PUBLIC_SITE_URL`.
+Use the repository-root `render.yaml` as a Render Blueprint. It builds this Dockerfile, starts the Next.js standalone server and checks `/api/health`. Render's public origin is injected automatically during the build; set `NEXT_PUBLIC_SITE_URL` only if you later use a custom domain.
 
 ## Honest scope
 

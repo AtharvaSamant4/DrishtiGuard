@@ -159,7 +159,7 @@ Use the **Deploy with Vercel** button above, or import this repository and set t
 
 Use the **Deploy to Render** button above, or create a Blueprint from the repository-root [`render.yaml`](render.yaml). The Blueprint builds [`apps/live-demo/Dockerfile`](apps/live-demo/Dockerfile), runs the minimal Next.js standalone server and health-checks `/api/health`.
 
-When Render asks for `NEXT_PUBLIC_SITE_URL`, enter the final HTTPS origin because Next.js bakes canonical social URLs during the image build. After deployment, replace the pending live URL in this README and the SIH deck with the verified address.
+Render supplies its public `onrender.com` origin automatically during the Docker build. If you later attach a custom domain, set `NEXT_PUBLIC_SITE_URL` to that HTTPS origin and rebuild. After deployment, replace the pending live URL in this README and the SIH deck with the verified address.
 
 ## Install the browser extension
 
