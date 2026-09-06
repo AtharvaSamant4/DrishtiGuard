@@ -1,25 +1,89 @@
 import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
+import { createServer } from "node:net";
+import { createRequire } from "node:module";
+import { dirname } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
-async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-  return worker.fetch(
-    new Request("http://localhost/", { headers: { accept: "text/html" } }),
-    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
-    { waitUntil() {}, passThroughOnException() {} },
-  );
+const require = createRequire(import.meta.url);
+const appRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+const nextCli = require.resolve("next/dist/bin/next");
+
+async function availablePort() {
+  const probe = createServer();
+  await new Promise((resolve, reject) => {
+    probe.once("error", reject);
+    probe.listen(0, "127.0.0.1", resolve);
+  });
+  const address = probe.address();
+  const port = typeof address === "object" && address ? address.port : 0;
+  await new Promise((resolve, reject) => probe.close((error) => (error ? reject(error) : resolve())));
+  return port;
 }
 
-test("server-renders the DrishtiGuard evidence lab", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
+async function startProductionServer() {
+  const port = await availablePort();
+  const processHandle = spawn(
+    process.execPath,
+    [nextCli, "start", "--hostname", "127.0.0.1", "--port", String(port)],
+    {
+      cwd: appRoot,
+      env: { ...process.env, NODE_ENV: "production" },
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+  let logs = "";
+  processHandle.stdout.on("data", (chunk) => {
+    logs += chunk;
+  });
+  processHandle.stderr.on("data", (chunk) => {
+    logs += chunk;
+  });
+
+  const origin = `http://127.0.0.1:${port}`;
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline) {
+    if (processHandle.exitCode !== null) {
+      throw new Error(`Next.js exited before it became ready.\n${logs}`);
+    }
+    try {
+      const response = await fetch(origin, { signal: AbortSignal.timeout(1_000) });
+      if (response.ok) return { logs: () => logs, origin, processHandle };
+    } catch {
+      // The server is still starting.
+    }
+    await delay(150);
+  }
+
+  processHandle.kill();
+  throw new Error(`Timed out waiting for the Next.js production server.\n${logs}`);
+}
+
+async function stopProductionServer(processHandle) {
+  if (processHandle.exitCode !== null) return;
+  processHandle.kill();
+  const exited = await Promise.race([
+    new Promise((resolve) => processHandle.once("exit", () => resolve(true))),
+    delay(5_000, false),
+  ]);
+  if (!exited && processHandle.exitCode === null) processHandle.kill("SIGKILL");
+}
+
+test("server-renders the DrishtiGuard evidence lab", { timeout: 45_000 }, async (context) => {
+  const server = await startProductionServer();
+  context.after(() => stopProductionServer(server.processHandle));
+
+  const response = await fetch(server.origin);
+  assert.equal(response.status, 200, server.logs());
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+  assert.equal(response.headers.get("x-powered-by"), null);
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
 
   const html = await response.text();
-  assert.match(html, /<title>DrishtiGuard — Interactive Privacy Boundary<\/title>/i);
+  assert.match(html, /<title>DrishtiGuard[^<]*Interactive Privacy Boundary<\/title>/i);
   assert.match(html, /SIH26171/);
   assert.match(html, /Run privacy pipeline/);
   assert.match(html, /Exact outbound body/);

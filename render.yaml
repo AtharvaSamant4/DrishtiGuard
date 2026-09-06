@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: drishtiguard-live-demo
+    runtime: node
+    plan: free
+    rootDir: apps/live-demo
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 22.13.0

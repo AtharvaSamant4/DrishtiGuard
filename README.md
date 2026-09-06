@@ -6,7 +6,7 @@
 
 **Smart India Hackathon 2026 · SIH26171 · Department of Space / ISRO**
 
-[![Live Demo](https://img.shields.io/badge/Live_demo-Open_DrishtiGuard-087A6E?style=for-the-badge)](https://drishtiguard-sih2026-live.aus2004.chatgpt.site)
+[![Deployment ready](https://img.shields.io/badge/Deployment-Vercel_or_Render-087A6E?style=for-the-badge)](#deploy-the-evidence-lab)
 [![CI](https://github.com/AtharvaSamant4/DrishtiGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/AtharvaSamant4/DrishtiGuard/actions/workflows/ci.yml)
 [![Manifest V3](https://img.shields.io/badge/Chrome-Manifest_V3-0B2430?style=flat-square)](apps/extension/manifest.json)
 [![Safety fixtures](https://img.shields.io/badge/Safety_fixtures-Passing-087A6E?style=flat-square)](evidence/verification-evidence.json)
@@ -16,13 +16,16 @@
 DrishtiGuard places a fail-closed privacy and action boundary inside the browser. It observes the visible page locally, minimizes what may leave the device, verifies the exact serialized payload, constrains the proposed action, and executes only after local freshness checks and explicit confirmation.
 
 > [!IMPORTANT]
-> **Current status:** functional Chromium extension MVP and public interactive evidence lab, backed by a production-target architecture. This repository does not claim a production-ready, universally private, OCR-enabled, or autonomous browser agent.
+> **Current status:** functional Chromium extension MVP and deployable interactive evidence lab, backed by a production-target architecture. This repository does not claim a production-ready, universally private, OCR-enabled, or autonomous browser agent.
 
 ## Try it
 
-**Public interactive prototype:** <https://drishtiguard-sih2026-live.aus2004.chatgpt.site>
+**Live URL:** pending team-managed Vercel or Render deployment.
 
-The hosted evidence lab runs entirely in the browser with synthetic data and exposes the minimized outbound JSON, SHA-256 digest, stage timings, confirmation boundary, and controlled failure paths.
+The evidence lab runs entirely in the browser with synthetic data and exposes the minimized outbound JSON, SHA-256 digest, stage timings, confirmation boundary, and controlled failure paths. Its standard Next.js source is ready for Vercel or Render.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FAtharvaSamant4%2FDrishtiGuard&root-directory=apps%2Flive-demo)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FAtharvaSamant4%2FDrishtiGuard)
 
 ![DrishtiGuard live evidence lab after confirmed execution](docs/assets/live-demo-executed.png)
 
@@ -61,7 +64,7 @@ flowchart LR
 | Deliverable | Location | Status |
 |---|---|---|
 | Chromium Manifest V3 extension | [`apps/extension`](apps/extension) | Functional MVP |
-| Public interactive evidence lab | [`apps/live-demo`](apps/live-demo) | Deployed and tested |
+| Deployable interactive evidence lab | [`apps/live-demo`](apps/live-demo) | Build and tests passing; live URL pending |
 | Versioned JSON wire contract | [`contracts/v1`](contracts/v1) | Draft 2020-12 schema |
 | TypeScript contract definitions | [`packages/contracts`](packages/contracts) | Architecture baseline |
 | Production-target architecture | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Design baseline v1.0 |
@@ -89,7 +92,7 @@ The MVP requests no host or storage permission, contains no remote code or API k
 
 ### Interactive evidence lab
 
-The live prototype demonstrates:
+The interactive prototype demonstrates:
 
 `Observe → Tokenize → Mask → Verify → Plan → Confirm → Execute`
 
@@ -129,6 +132,20 @@ npm run dev
 ```
 
 Open the local URL printed by the development server. Run the normal pipeline first, then enable Failure Lab switches individually to inspect each fail-closed path.
+
+## Deploy the evidence lab
+
+The demo requires no database, API key, or backend service.
+
+### Vercel
+
+Use the **Deploy with Vercel** button above, or import this repository and set the project **Root Directory** to `apps/live-demo`. Vercel detects Next.js automatically.
+
+### Render
+
+Use the **Deploy to Render** button above, or create a Blueprint from the repository-root [`render.yaml`](render.yaml). The Blueprint selects `apps/live-demo`, installs the lockfile, builds the app, starts its production server, and health-checks `/`.
+
+After choosing the final domain, set `NEXT_PUBLIC_SITE_URL` to its HTTPS origin and redeploy. Then replace the pending live URL in this README and the SIH deck with that verified address.
 
 ## Install the browser extension
 
