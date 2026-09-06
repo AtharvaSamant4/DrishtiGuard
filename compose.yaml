@@ -1,0 +1,25 @@
+name: drishtiguard
+
+services:
+  web:
+    image: drishtiguard-live-demo:local
+    build:
+      context: ./apps/live-demo
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    ports:
+      - "${DRISHTIGUARD_PORT:-3000}:3000"
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      NEXT_TELEMETRY_DISABLED: "1"
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped

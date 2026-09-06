@@ -1,12 +1,13 @@
 services:
   - type: web
     name: drishtiguard-live-demo
-    runtime: node
+    runtime: docker
     plan: free
-    rootDir: apps/live-demo
-    buildCommand: npm ci && npm run build
-    startCommand: npm start
-    healthCheckPath: /
+    dockerfilePath: ./apps/live-demo/Dockerfile
+    dockerContext: ./apps/live-demo
+    healthCheckPath: /api/health
     envVars:
-      - key: NODE_VERSION
-        value: 22.13.0
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false

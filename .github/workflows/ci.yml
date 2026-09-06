@@ -75,3 +75,49 @@ jobs:
 
       - name: Audit dependencies
         run: npm audit --audit-level=high
+
+  production-container:
+    name: Production Docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Build production image
+        run: >-
+          docker build
+          --build-arg NEXT_PUBLIC_SITE_URL=https://drishtiguard.example
+          --tag drishtiguard-live-demo:ci
+          apps/live-demo
+
+      - name: Smoke-test hardened container
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --rm \
+            --name drishtiguard-live-demo-ci \
+            --publish 127.0.0.1:3000:3000 \
+            --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,size=16m \
+            --cap-drop ALL \
+            --security-opt no-new-privileges \
+            drishtiguard-live-demo:ci
+          trap 'docker logs drishtiguard-live-demo-ci || true; docker stop drishtiguard-live-demo-ci || true' EXIT
+
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/api/health | grep --quiet '"status":"ok"'; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              exit 1
+            fi
+            sleep 1
+          done
+
+          curl --fail --silent --show-error http://127.0.0.1:3000/ > /dev/null
+          curl --fail --silent --show-error --dump-header /tmp/download-headers \
+            http://127.0.0.1:3000/downloads/DrishtiGuard-Chromium-v0.1.0.zip \
+            --output /tmp/DrishtiGuard-Chromium-v0.1.0.zip
+          grep --ignore-case --quiet '^content-disposition: attachment;' /tmp/download-headers
+          echo 'b46cbbac81d829264485ddfebf17bbbec964ba203939d600abcc2a5b73c6d087  /tmp/DrishtiGuard-Chromium-v0.1.0.zip' | sha256sum --check --status

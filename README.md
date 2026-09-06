@@ -119,7 +119,7 @@ All identities, identifiers, organizations, invoices, and account data are synth
 | Prompt-injection cases blocked | 3/3 |
 | Stale-state cases blocked | 1/1 |
 | Exact sample payload | 654 bytes |
-| Live-demo tests | 2/2 passed |
+| Live-demo tests | 3/3 passed |
 
 These are deterministic safety-gate fixtures, not model-accuracy, browser-parity, latency, or universal-privacy measurements. See the [machine-readable evidence record](evidence/verification-evidence.json).
 
@@ -137,6 +137,16 @@ npm run dev
 
 Open the local URL printed by the development server. Run the normal pipeline first, then enable Failure Lab switches individually to inspect each fail-closed path.
 
+### Run the production container
+
+Requirements: Docker Desktop or Docker Engine with Compose.
+
+```bash
+docker compose up --build
+```
+
+Open `http://localhost:3000`. The container runs as a non-root user with a read-only filesystem, dropped Linux capabilities, a bounded temporary directory and an HTTP health check. Stop it with `docker compose down`.
+
 ## Deploy the evidence lab
 
 The demo requires no database, API key, or backend service.
@@ -147,9 +157,9 @@ Use the **Deploy with Vercel** button above, or import this repository and set t
 
 ### Render
 
-Use the **Deploy to Render** button above, or create a Blueprint from the repository-root [`render.yaml`](render.yaml). The Blueprint selects `apps/live-demo`, installs the lockfile, builds the app, starts its production server, and health-checks `/`.
+Use the **Deploy to Render** button above, or create a Blueprint from the repository-root [`render.yaml`](render.yaml). The Blueprint builds [`apps/live-demo/Dockerfile`](apps/live-demo/Dockerfile), runs the minimal Next.js standalone server and health-checks `/api/health`.
 
-After choosing the final domain, set `NEXT_PUBLIC_SITE_URL` to its HTTPS origin and redeploy. Then replace the pending live URL in this README and the SIH deck with that verified address.
+When Render asks for `NEXT_PUBLIC_SITE_URL`, enter the final HTTPS origin because Next.js bakes canonical social URLs during the image build. After deployment, replace the pending live URL in this README and the SIH deck with the verified address.
 
 ## Install the browser extension
 

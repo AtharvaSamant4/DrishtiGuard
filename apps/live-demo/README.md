@@ -35,13 +35,36 @@ npm audit --audit-level=high
 
 `npm test` creates a production Next.js build, boots it on an ephemeral local port, verifies the reviewer-facing HTML and response hardening headers, and statically checks the exact-byte SHA-256, residual-PII, prompt-injection, confirmation, freshness, and no-outbound-network gates.
 
+## Run the production container
+
+From the repository root:
+
+```bash
+docker compose up --build
+```
+
+Open `http://localhost:3000` and check `http://localhost:3000/api/health`. The Compose profile applies a non-root user, read-only root filesystem, dropped Linux capabilities and `no-new-privileges`.
+
+To build the image directly with the correct canonical metadata URL:
+
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_SITE_URL=https://demo.example.com \
+  --tag drishtiguard-live-demo:latest \
+  .
+
+docker run --rm --publish 3000:3000 drishtiguard-live-demo:latest
+```
+
+Run the direct-build commands from `apps/live-demo`. `NEXT_PUBLIC_SITE_URL` is a build-time value; changing it only at `docker run` time does not rewrite the statically generated social metadata.
+
 ## Deploy on Vercel
 
 Import the repository in Vercel and set **Root Directory** to `apps/live-demo`. Keep the detected Next.js build settings. Optionally set `NEXT_PUBLIC_SITE_URL` to the final HTTPS origin so social metadata uses your canonical domain.
 
 ## Deploy on Render
 
-Use the repository-root `render.yaml` as a Render Blueprint. It installs locked dependencies, builds the Next.js app, starts the production server, and checks `/` for health. Optionally set `NEXT_PUBLIC_SITE_URL` to your final custom HTTPS origin; otherwise Render's supplied external URL is used.
+Use the repository-root `render.yaml` as a Render Blueprint. It builds this Dockerfile, starts the Next.js standalone server and checks `/api/health`. Enter the service's final HTTPS origin when Render prompts for `NEXT_PUBLIC_SITE_URL`.
 
 ## Honest scope
 

@@ -108,6 +108,15 @@ test("server-renders the DrishtiGuard evidence lab", { timeout: 45_000 }, async 
   const downloadBytes = Buffer.from(await downloadResponse.arrayBuffer());
   assert.ok(downloadBytes.length > 10_000, "extension ZIP should not be an empty placeholder");
   assert.equal(downloadBytes.subarray(0, 4).toString("hex"), "504b0304");
+
+  const healthResponse = await fetch(`${server.origin}/api/health`);
+  assert.equal(healthResponse.status, 200);
+  assert.match(healthResponse.headers.get("cache-control") ?? "", /^no-store\b/i);
+  assert.deepEqual(await healthResponse.json(), {
+    status: "ok",
+    service: "drishtiguard-live-demo",
+    version: "0.1.0",
+  });
 });
 
 test("source contains the claimed local safety gates", async () => {
