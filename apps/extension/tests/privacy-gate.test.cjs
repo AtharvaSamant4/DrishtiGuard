@@ -56,7 +56,7 @@ const sensitiveFixtures = [
 context.snapshot = {
   scheme: "https",
   pathDepth: 2,
-  title: "Travel claim for Aditi Example",
+  title: "Travel claim for Atharva Example",
   language: "en-IN",
   documentText: sensitiveFixtures.map((fixture) => `${fixture.type}: ${fixture.value}`).join(" "),
   viewport: { width: 1200, height: 800, devicePixelRatio: 1 },
@@ -94,7 +94,7 @@ assert.equal(context.analysis.coverageGaps.length, 0);
 for (const fixture of sensitiveFixtures) {
   assert.equal(context.serialized.includes(fixture.value), false, `${fixture.type} leaked`);
 }
-assert.equal(context.serialized.includes("Aditi Example"), false, "arbitrary page title leaked");
+assert.equal(context.serialized.includes("Atharva Example"), false, "arbitrary page title leaked");
 assert.equal(context.analysis.outboundPayload.privacyManifest.sensitiveRegionsMasked, sensitiveFixtures.length);
 assert.equal(context.analysis.outboundPayload.sceneGraph.nodes.length, 1);
 assert.equal(context.analysis.preferredTarget.safeLabel, "Submit claim");

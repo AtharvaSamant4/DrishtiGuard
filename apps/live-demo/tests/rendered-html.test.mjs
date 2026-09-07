@@ -86,7 +86,10 @@ test("server-renders the DrishtiGuard evidence lab", { timeout: 45_000 }, async 
   const html = await response.text();
   assert.match(html, /<title>DrishtiGuard[^<]*Privacy Guardrail[^<]*Extension Demo<\/title>/i);
   assert.match(html, /SIH26171/);
-  assert.match(html, /Run privacy pipeline/);
+  assert.match(html, /Start protection demo/);
+  assert.match(html, /Protect page/);
+  assert.match(html, /AI suggests/);
+  assert.match(html, /Guarded action/);
   assert.match(html, /HOW THE PROTOTYPE WORKS/);
   assert.match(html, /Candidate safe payload/);
   assert.match(html, /FAILURE LAB/);
